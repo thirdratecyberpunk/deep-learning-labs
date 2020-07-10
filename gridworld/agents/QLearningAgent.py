@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from environments.Direction import Direction
 
 # defining an agent who utilises Q-learning
 # model-free RL algorithm that learns a policy for an agent
@@ -15,7 +16,8 @@ class QLearningAgent():
         for x in range(environment.height):
             for y in range(environment.width):
                 # sets initial action rewards for a state
-                self.q_table[(x,y)] = {"UP": 0, "DOWN": 0, "LEFT": 0, "RIGHT": 0}
+                # TODO: make this defined from actions available in environment
+                self.q_table[(x,y)] = {Direction.UP: 0, Direction.DOWN: 0, Direction.LEFT: 0, Direction.RIGHT: 0}
 
         # % chance that the agent will perform a random exploratory action
         self.epsilon = epsilon

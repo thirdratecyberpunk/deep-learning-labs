@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from environments.Direction import Direction
 
 # implementation of a State-Action-Reward-State-Action (SARSA) agent
 # on-policy control method
@@ -14,8 +15,8 @@ class SARSAAgent():
         self.q_table = dict()
         for x in range(environment.height):
             for y in range(environment.width):
-                # sets initial action rewards for a state
-                self.q_table[(x,y)] = {"UP": 0, "DOWN": 0, "LEFT": 0, "RIGHT": 0}
+                # TODO: make this defined from actions available in environment
+                self.q_table[(x,y)] = {Direction.UP: 0, Direction.DOWN: 0, Direction.LEFT: 0, Direction.RIGHT: 0}
         self.epsilon = epsilon
         self.alpha = alpha
         self.gamma = gamma

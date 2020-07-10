@@ -1,4 +1,6 @@
 # defining LineWalking
+from environments.Direction import Direction
+
 class LineWalking:
     def __init__(self, width = 10):
         self.height = 1
@@ -13,7 +15,7 @@ class LineWalking:
         self.cliff[self.cliff_edge] = -100
         self.cliff[self.end_of_cliff] = 100
 
-        self.actions = ['LEFT', 'RIGHT']
+        self.actions = [Direction.LEFT, Direction.RIGHT]
 
         self.env_title = "LineWalking"
 
@@ -33,13 +35,13 @@ class LineWalking:
         at a border, in which case the agent stays still"""
         last_location = self.current_location
         reward = 0
-        if action == "LEFT":
+        if action == Direction.LEFT:
             if last_location[1] == 0:
                 reward = self.get_reward(last_location)
             else:
                 self.current_location = (0, self.current_location[1] - 1)
                 reward = self.get_reward(self.current_location)
-        elif action == "RIGHT":
+        elif action == Direction.RIGHT:
             if last_location[1] == self.width - 1:
                 reward = self.get_reward(last_location)
             else:

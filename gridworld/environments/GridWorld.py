@@ -1,4 +1,6 @@
 # defining Gridworld environment
+from environments.Direction import Direction
+
 class GridWorld:
     def __init__(self, height = 5, width = 5):
         # defining grid world size
@@ -19,7 +21,7 @@ class GridWorld:
         self.grid[self.gold_location[0], self.gold_location[1]] = 10
 
         # setting available actions for agent
-        self.actions = ['UP', 'DOWN', 'LEFT', 'RIGHT']
+        self.actions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
 
         # environment name for graphing
         self.env_title = "GridWorld"
@@ -43,25 +45,25 @@ class GridWorld:
         at a border, in which case the agent stays still"""
         last_location = self.current_location
 
-        if action == "UP":
+        if action == Direction.UP:
             if last_location[0] == 0:
                 reward = self.get_reward(last_location)
             else:
                 self.current_location = (self.current_location[0] - 1, self.current_location[1])
                 reward = self.get_reward(self.current_location)
-        elif action == "DOWN":
+        elif action == Direction.DOWN:
             if last_location[0] == self.height - 1:
                 reward = self.get_reward(last_location)
             else:
                 self.current_location = (self.current_location[0] + 1, self.current_location[1])
                 reward = self.get_reward(self.current_location)
-        elif action == "LEFT":
+        elif action == Direction.LEFT:
             if last_location[1] == 0:
                 reward = self.get_reward(last_location)
             else:
                 self.current_location = (self.current_location[0], self.current_location[1] - 1)
                 reward = self.get_reward(self.current_location)
-        elif action == "RIGHT":
+        elif action == Direction.RIGHT:
             if last_location[1] == self.width - 1:
                 reward = self.get_reward(last_location)
             else:

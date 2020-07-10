@@ -1,6 +1,6 @@
 # defining CliffWalking environment
 import numpy as np
-import matplotlib.pyplot as plt
+from environments.Direction import Direction
 
 class CliffWalking:
     def __init__(self, height = 4, width = 12):
@@ -22,7 +22,8 @@ class CliffWalking:
             self.grid[x[0], x[1]] = -100
 
         # setting available actions for agent
-        self.actions = ['UP', 'DOWN', 'LEFT', 'RIGHT']
+#        self.actions = ['UP', 'DOWN', 'LEFT', 'RIGHT']
+        self.actions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
 
         # environment name for graphing
         self.env_title = "CliffWalking"
@@ -33,9 +34,20 @@ class CliffWalking:
 
     def agents_on_map(self):
         """prints out a map representing the grid and the agent's location"""
-        grid = np.zeros(( self.height, self.width))
+        grid = np.zeros((self.height, self.width))
         grid[self.current_location[0], self.current_location[1]] = 1
         return grid
+    
+    def agents_on_map_vector(self):
+        return self.agents_on_map().flatten()
+
+    def coords_to_aom(self, coords):
+        grid = np.zeros((self.height, self.width))
+        grid[[coords[0]], coords[1]] = 1
+        return grid
+    
+    def coords_to_aom_vector(self, coords):
+        return self.coords_to_aom(coords).flatten()
 
     def get_reward(self, new_location):
         """returns the reward for an input position"""
@@ -46,26 +58,25 @@ class CliffWalking:
         at a border, in which case the agent stays still
         agents that touch the cliff edge are teleported to the start"""
         last_location = self.current_location
-
-        if action == "UP":
+        if action == Direction.UP:
             if last_location[0] == 0:
                 reward = self.get_reward(last_location)
             else:
                 self.current_location = (self.current_location[0] - 1, self.current_location[1])
                 reward = self.get_reward(self.current_location)
-        elif action == "DOWN":
+        elif action == Direction.DOWN:
             if last_location[0] == self.height - 1:
                 reward = self.get_reward(last_location)
             else:
                 self.current_location = (self.current_location[0] + 1, self.current_location[1])
                 reward = self.get_reward(self.current_location)
-        elif action == "LEFT":
+        elif action == Direction.LEFT:
             if last_location[1] == 0:
                 reward = self.get_reward(last_location)
             else:
                 self.current_location = (self.current_location[0], self.current_location[1] - 1)
                 reward = self.get_reward(self.current_location)
-        elif action == "RIGHT":
+        elif action == Direction.RIGHT:
             if last_location[1] == self.width - 1:
                 reward = self.get_reward(last_location)
             else:
