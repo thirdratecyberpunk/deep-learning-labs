@@ -22,7 +22,6 @@ class CliffWalking:
             self.grid[x[0], x[1]] = -100
 
         # setting available actions for agent
-#        self.actions = ['UP', 'DOWN', 'LEFT', 'RIGHT']
         self.actions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
 
         # environment name for graphing

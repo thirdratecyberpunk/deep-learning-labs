@@ -16,7 +16,9 @@ from agents.SARSAAgent import SARSAAgent
 
 import matplotlib.pyplot as plt
 
-def play(environment, agent, trials=500, max_steps_per_episode=1000, learn=False):
+import sys
+
+def play(environment, agent, trials=500, max_steps_per_episode=1000, learn=False, update=False, target_update = 10):
     """runs a number of episodes of the given environment"""
     reward_per_episode = []
     for trial in range(trials):
@@ -29,7 +31,6 @@ def play(environment, agent, trials=500, max_steps_per_episode=1000, learn=False
 #            print(f"Step {step}/ {max_steps_per_episode}: Agent chose {action}")
             reward = environment.make_step(action)
             new_state = environment.current_location
-
             if learn == True:
                 agent.learn(old_state, reward, new_state, action)
 
@@ -40,26 +41,30 @@ def play(environment, agent, trials=500, max_steps_per_episode=1000, learn=False
                 environment.__init__()
                 game_over = True
 
-        print(f"Finished trial {trial} after {step} steps, reward {cumulative_reward}")
+        print(f"Finished trial {trial}/{trials} after {step} steps, reward {cumulative_reward}")
         reward_per_episode.append(cumulative_reward)
+        
+        # tells agent to update, if that is relevant (i.e. dqn)
+        if (update == True and trial % target_update == 0):
+            agent.update()
     return reward_per_episode
 
 def main():
     environment = CliffWalking()
     random_agent = RandomAgent()
     q_learning_agent = QLearningAgent(environment)
-#    deep_q_learning_agent = DeepQLearningAgent(environment)
+    deep_q_learning_agent = DeepQLearningAgent(environment)
     sarsa_agent = SARSAAgent(environment)
     
     plt.title(f"{environment.env_title} reward values")
-    random_reward_per_episode = play(environment, random_agent, trials = 1000)
-    plt.plot(random_reward_per_episode, label="Random")
-    q_learning_reward_per_episode = play(environment, q_learning_agent, trials = 1000, learn = True)
-    plt.plot(q_learning_reward_per_episode, label="Q-Learning")
-#    deep_q_learning_reward_per_episode = play(environment, deep_q_learning_agent, trials = 1000, learn = True)
-#    plt.plot(deep_q_learning_reward_per_episode, label="Deep Q-Learning")
-    sarsa_learning_reward_per_episode = play(environment, sarsa_agent, trials = 1000, learn = True)
-    plt.plot(sarsa_learning_reward_per_episode, label="SARSA")
+#    random_reward_per_episode = play(environment, random_agent, trials = 1000)
+#    plt.plot(random_reward_per_episode, label="Random")
+#    q_learning_reward_per_episode = play(environment, q_learning_agent, trials = 1000, learn = True)
+#    plt.plot(q_learning_reward_per_episode, label="Q-Learning")
+    deep_q_learning_reward_per_episode = play(environment, deep_q_learning_agent, trials = 1000, learn = True, update=True)
+    plt.plot(deep_q_learning_reward_per_episode, label="Deep Q-Learning")
+#    sarsa_learning_reward_per_episode = play(environment, sarsa_agent, trials = 1000, learn = True)
+#    plt.plot(sarsa_learning_reward_per_episode, label="SARSA")
     plt.legend(loc="lower left")
     plt.show()
     
