@@ -68,6 +68,10 @@ def vector_to_tensor(vector):
 # takes state as input, generates Q-value for all possible actions as output
 class DeepQLearningAgent():
     def __init__(self, environment, epsilon=0.05, alpha=0.1, gamma=1, batch_size=128):
+        # checking CUDA support
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        print (self.device)
+        # environment that agent is attempting to explore
         self.environment = environment
         # % chance that the agent will perform a random exploratory action
         self.epsilon = epsilon
@@ -105,10 +109,10 @@ class DeepQLearningAgent():
 
     def learn(self, old_state, reward, new_state, action):
         # add the state transition to the memory
-        old_state_as_vector = vector_to_tensor(self.environment.coords_to_aom_vector(old_state))
-        new_state_as_vector = vector_to_tensor(self.environment.coords_to_aom_vector(new_state))
-        action_as_tensor = torch.tensor(action.value)
-        reward_as_tensor = torch.tensor(reward)
+        old_state_as_vector = vector_to_tensor(self.environment.coords_to_aom_vector(old_state)).to(self.device)
+        new_state_as_vector = vector_to_tensor(self.environment.coords_to_aom_vector(new_state)).to(self.device)
+        action_as_tensor = torch.tensor(action.value).to(self.device)
+        reward_as_tensor = torch.tensor(reward).to(self.device)
         self.memory.push(old_state_as_vector, action_as_tensor, new_state_as_vector, reward_as_tensor)
         # if the memory isn't full, skip learning
         if len(self.memory) < self.batch_size:
@@ -118,9 +122,9 @@ class DeepQLearningAgent():
         # prepare batch of transitions to learn from
         batch = Transition(*zip(*transitions))
 
-        state_batch = torch.stack(batch.state)
-        action_batch = torch.cat([torch.unsqueeze(i, 0) for i in batch.action])
-        reward_batch = torch.stack(batch.reward)   
+        state_batch = torch.stack(batch.state).to(self.device)
+        action_batch = torch.cat([torch.unsqueeze(i, 0) for i in batch.action]).to(self.device)
+        reward_batch = torch.stack(batch.reward).to(self.device)
         # compute Q(s_t, a)
         # first, calculate the Q value for a given state via model
         old_state_q_values = self.policy_qnn(state_batch)
@@ -142,5 +146,8 @@ class DeepQLearningAgent():
         self.optimiser.step()
         
     def update(self):
+        """
+        Updates the weights used by the target QNN to use policy QNN weights
+        """
         self.target_qnn.load_state_dict(self.policy_qnn.state_dict())
 
