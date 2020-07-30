@@ -70,7 +70,6 @@ class DeepQLearningAgent():
     def __init__(self, environment, epsilon=0.05, alpha=0.1, gamma=1, batch_size=128):
         # checking CUDA support
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print (self.device)
         # environment that agent is attempting to explore
         self.environment = environment
         # % chance that the agent will perform a random exploratory action
