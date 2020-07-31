@@ -21,12 +21,16 @@ class PolicyNetwork(nn.Module):
     """
     def __init__(self, in_features=48, num_actions=4):
         super(PolicyNetwork, self).__init__()
-        self.hidden_layer = nn.Linear(in_features, 64)
-        self.output_layer = nn.Linear(64, num_actions)
+        self.fc1 = nn.Linear(in_features, 256)
+        self.fc2 = nn.Linear(256, 128)
+        self.fc3 = nn.Linear(128, 64)
+        self.fc4 = nn.Linear(64, num_actions)
 
-    def forward(self,x):
-        x = F.relu(self.hidden_layer(x))
-        x = F.softmax(self.output_layer(x))
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = F.softmax(self.fc4(x))
         return x
 
 def vector_to_tensor(vector):
@@ -39,7 +43,7 @@ def vector_to_tensor(vector):
 # capable of handling Partially Observable Markov Decision Processes
 class VPGAgent():
     # initialises
-    def __init__(self, environment, epsilon=0.05, alpha=0.1, gamma=1):
+    def __init__(self, environment, epsilon=0.05, alpha=0.1, gamma=0.5):
         # checking CUDA support
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         # environment the agent operates in
@@ -69,13 +73,15 @@ class VPGAgent():
         # add values to collection of episode details
         self.rewards.append(reward)
         self.actions.append(action.value)
-        self.states.append((self.environment.agents_on_map_vector()))
+        self.states.append((self.environment.coords_to_aom_vector(new_state)))
 
 
     def finish_episode(self):
         # calculating the gradient at the end of an episode
         # preprocess rewards
-        R = torch.sum(torch.tensor(self.rewards))
+#        R = torch.sum(torch.tensor(self.rewards))
+        self.rewards = np.array(self.rewards)
+        R = torch.tensor([np.sum(self.rewards[i:]*(self.gamma**np.array(range(i, len(self.rewards))))) for i in range(len(self.rewards))])
         # preprocess states and actions
         states_tensor = torch.tensor(self.states).float().to(self.device)
         actions_tensor = torch.tensor(self.actions).to(self.device)
@@ -87,4 +93,8 @@ class VPGAgent():
         # update policy weights
         self.optimiser.zero_grad()
         pseudo_loss.backward()
-        self.optimiser.zero_grad()
+        self.optimiser.step()
+        # clear 
+        self.rewards = []
+        self.actions = []
+        self.states = []
